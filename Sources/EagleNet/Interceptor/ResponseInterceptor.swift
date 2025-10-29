@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// This protocol is used to intercept the response before it is returned to the caller.
 /// It is useful for modifying the response Data or URLResponse.
