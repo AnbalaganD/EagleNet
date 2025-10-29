@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// This protocol allows you to modify a network request before it is submitted.
 /// Implement this to customize the request as needed.
