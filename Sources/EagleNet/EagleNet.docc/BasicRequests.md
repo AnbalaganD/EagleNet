@@ -20,6 +20,11 @@ struct User: Decodable {
 let user: User = try await EagleNet.get(
     url: "https://api.example.com/users/1"
 )
+
+// Get raw response data
+let (data, response) = try await EagleNet.get(
+    url: "https://api.example.com/users/1"
+)
 ```
 
 ## POST Requests
@@ -42,6 +47,12 @@ let response: UserResponse = try await EagleNet.post(
     url: "https://api.example.com/users",
     body: newUser
 )
+
+// Get raw response data
+let (data, urlResponse) = try await EagleNet.post(
+    url: "https://api.example.com/users",
+    body: newUser
+)
 ```
 
 ## PUT Requests
@@ -59,6 +70,12 @@ let response: UserResponse = try await EagleNet.put(
     url: "https://api.example.com/users/1",
     body: updatedUser
 )
+
+// Get raw response data
+let (data, urlResponse) = try await EagleNet.put(
+    url: "https://api.example.com/users/1",
+    body: updatedUser
+)
 ```
 
 ## DELETE Requests
@@ -66,5 +83,12 @@ let response: UserResponse = try await EagleNet.put(
 Remove resources:
 
 ```swift
-try await EagleNet.delete(url: "https://api.example.com/users/1")
+let response: DeleteResponse = try await EagleNet.delete(
+    url: "https://api.example.com/users/1"
+)
+
+// Get raw response data
+let (data, urlResponse) = try await EagleNet.delete(
+    url: "https://api.example.com/users/1"
+)
 ```

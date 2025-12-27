@@ -5,6 +5,8 @@
 //  Created by Anbalagan on 07/01/25.
 //
 
+import Foundation
+
 /// Extension providing file upload convenience methods for EagleNet
 extension EagleNet {
     /// Performs a multipart form-data upload request
@@ -50,6 +52,61 @@ extension EagleNet {
         parameters: [MultipartParameter] = [],
         progress: ProgressHandler? = nil
     ) async throws -> Response {
+        try await networkService.upload(
+            makeRequest(
+                url: url,
+                path: path,
+                headers: headers,
+                queryParameters: queryParameters,
+                parameters: parameters
+            ),
+            progress: progress
+        )
+    }
+    
+    /// Performs a multipart form-data upload request returning raw data and response
+    /// 
+    /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.
+    /// Use this when you need access to the raw response data or response metadata.
+    /// 
+    /// See ``upload(url:path:headers:queryParameters:parameters:progress:)->Response`` for the decoded response variant.
+    /// 
+    /// - Parameters:
+    ///   - url: The base URL for the upload request
+    ///   - path: Optional path to append to the URL
+    ///   - headers: Optional HTTP headers
+    ///   - queryParameters: Optional URL query parameters
+    ///   - parameters: Array of MultipartParameter (files and text fields)
+    ///   - progress: Optional closure to track upload progress
+    /// - Returns: Tuple containing raw response Data and URLResponse
+    /// - Throws: NetworkError if the upload fails
+    public static func upload(
+        url: any URLConvertible,
+        path: String? = nil,
+        headers: [String: String]? = nil,
+        queryParameters: [String: String]? = nil,
+        parameters: [MultipartParameter] = [],
+        progress: ProgressHandler? = nil
+    ) async throws -> (Data, URLResponse) {
+        try await networkService.upload(
+            makeRequest(
+                url: url,
+                path: path,
+                headers: headers,
+                queryParameters: queryParameters,
+                parameters: parameters
+            ),
+            progress: progress
+        )
+    }
+    
+    static private func makeRequest(
+        url: any URLConvertible,
+        path: String? = nil,
+        headers: [String: String]? = nil,
+        queryParameters: [String: String]? = nil,
+        parameters: [MultipartParameter] = []
+    ) -> MultipartRequest {
         var request = MultipartRequest(
             url: url,
             path: path,
@@ -75,6 +132,6 @@ extension EagleNet {
             }
         }
 
-        return try await networkService.upload(request, progress: progress)
+        return request
     }
 }

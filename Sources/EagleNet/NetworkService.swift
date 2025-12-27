@@ -49,6 +49,18 @@ public protocol NetworkService: Sendable {
     /// - Returns: Decoded response of type `Response`
     /// - Throws: NetworkError if the request fails or response cannot be decoded
     func execute<Response: Decodable>(_ request: any NetworkRequestable) async throws -> Response
+    
+    /// Executes a network request and returns raw data and response
+    /// 
+    /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.
+    /// Use this when you need access to the raw response data or response metadata.
+    /// 
+    /// See ``execute(_:)->Response`` for the decoded response variant.
+    /// 
+    /// - Parameter request: The request to execute
+    /// - Returns: Tuple containing raw response Data and URLResponse
+    /// - Throws: NetworkError if the request fails
+    func execute(_ request: any NetworkRequestable) async throws -> (Data, URLResponse)
 
     /// Uploads data with progress tracking
     /// - Parameters:
@@ -60,6 +72,23 @@ public protocol NetworkService: Sendable {
         _ request: any NetworkRequestable,
         progress: ProgressHandler?
     ) async throws -> Response
+    
+    /// Uploads data with progress tracking and returns raw data and response
+    /// 
+    /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.
+    /// Use this when you need access to the raw response data or response metadata.
+    /// 
+    /// See ``upload(_:progress:)->Response`` for the decoded response variant.
+    /// 
+    /// - Parameters:
+    ///   - request: The upload request to execute
+    ///   - progress: Optional closure to track upload progress
+    /// - Returns: Tuple containing raw response Data and URLResponse
+    /// - Throws: NetworkError if the upload fails
+    func upload(
+        _ request: any NetworkRequestable,
+        progress: ProgressHandler?
+    ) async throws -> (Data, URLResponse)
 
     /// Adds an interceptor to modify requests before they are sent
     /// - Parameter interceptor: The request interceptor to add
@@ -89,6 +118,11 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     }
 
     func execute<Response: Decodable>(_ request: any NetworkRequestable) async throws -> Response {
+        let result = try await execute(request)
+        return try handleResponse(data: result.0, response: result.1)
+    }
+    
+    func execute(_ request: any NetworkRequestable) async throws -> (Data, URLResponse) {
         var urlRequest = try buildRequest(from: request)
 
         urlRequest = try await requestInterceptor.reduce(urlRequest) { result, interceptor in
@@ -97,17 +131,23 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
 
         let result = try await urlSession.data(for: urlRequest)
 
-        let (data, urlResponse) = try await responseInterceptors.reduce(result) { result, interceptor in
+        return try await responseInterceptors.reduce(result) { result, interceptor in
             try await interceptor.modify(data: result.0, urlResponse: result.1)
         }
-
-        return try handleResponse(data: data, response: urlResponse)
     }
 
     func upload<Response: Decodable>(
         _ request: any NetworkRequestable,
         progress: ProgressHandler? = nil
     ) async throws -> Response {
+        let result = try await execute(request)
+        return try handleResponse(data: result.0, response: result.1)
+    }
+    
+    func upload(
+        _ request: any NetworkRequestable,
+        progress: ProgressHandler?
+    ) async throws -> (Data, URLResponse) {
         var urlRequest = try buildRequest(from: request)
 
         urlRequest = try await requestInterceptor.reduce(urlRequest) { result, interceptor in
@@ -122,11 +162,9 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
             delegate: SessionDelegate(progress: progress)
         )
 
-        let (data, urlResponse) = try await responseInterceptors.reduce(result) { result, interceptor in
+        return try await responseInterceptors.reduce(result) { result, interceptor in
             try await interceptor.modify(data: result.0, urlResponse: result.1)
         }
-
-        return try handleResponse(data: data, response: urlResponse)
     }
 
     func addRequestInterceptor(_ interceptor: any RequestInterceptor) {
