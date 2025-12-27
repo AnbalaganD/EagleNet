@@ -25,6 +25,9 @@ let patchRequest = DataRequest(
 )
 
 let response: User = try await EagleNet.execute(patchRequest)
+
+// Get raw response data
+let (data, urlResponse) = try await EagleNet.execute(patchRequest)
 ```
 
 ### HEAD Requests

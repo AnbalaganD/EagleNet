@@ -19,11 +19,11 @@ See the complete documentation here: [Documentation](https://swiftpackageindex.c
 
 ### Swift Package Manager (SPM)<br/> [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FAnbalaganD%2FEagleNet%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/AnbalaganD/EagleNet) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FAnbalaganD%2FEagleNet%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/AnbalaganD/EagleNet)
 
-EagleNet is available through [SPM](https://github.com/AnbalaganD/EagleNet). Use the URL below to add it as a dependency.
+EagleNet is available through [SPM](https://swiftpackageindex.com/AnbalaganD/EagleNet). Use the URL below to add it as a dependency.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.0.0"))
+    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.0.1"))
 ]
 ```
 
@@ -40,6 +40,11 @@ struct User: Decodable {
 
 // Basic GET request
 let user: User = try await EagleNet.get(
+    url: "https://api.example.com/users/1"
+)
+
+// Get raw response data
+let (data, response) = try await EagleNet.get(
     url: "https://api.example.com/users/1"
 )
 ```
@@ -59,6 +64,12 @@ struct UserResponse: Decodable {
 
 let newUser = CreateUser(name: "Anbalagan D", email: "anbu94p@gmail.com")
 let response: UserResponse = try await EagleNet.post(
+    url: "https://api.example.com/users",
+    body: newUser
+)
+
+// Get raw response data
+let (data, urlResponse) = try await EagleNet.post(
     url: "https://api.example.com/users",
     body: newUser
 )
@@ -83,6 +94,14 @@ let response: UploadResponse = try await EagleNet.upload(
         let progress = Float(bytesTransferred) / Float(totalBytes)
         print("Upload progress: \(Int(progress * 100))%")
     }
+)
+
+// Get raw response data
+let (data, urlResponse) = try await EagleNet.upload(
+    url: "https://api.example.com/upload",
+    parameters: [
+        .file(key: "avatar", fileName: "profile.jpg", data: imageData, mimeType: .jpegImage)
+    ]
 )
 ```
 
