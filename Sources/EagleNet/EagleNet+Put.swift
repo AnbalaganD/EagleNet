@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Extension providing PUT request convenience methods for EagleNet
 extension EagleNet {
