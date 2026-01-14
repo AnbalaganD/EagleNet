@@ -104,7 +104,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     private let jsonEncoder: JSONEncoder
     private let jsonDecoder: JSONDecoder
 
-    private var requestInterceptor = [any RequestInterceptor]()
+    private var requestInterceptors = [any RequestInterceptor]()
     private var responseInterceptors = [any ResponseInterceptor]()
 
     required init(
@@ -125,7 +125,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     func execute(_ request: any NetworkRequestable) async throws -> (Data, URLResponse) {
         var urlRequest = try buildRequest(from: request)
 
-        urlRequest = try await requestInterceptor.reduce(urlRequest) { result, interceptor in
+        urlRequest = try await requestInterceptors.reduce(urlRequest) { result, interceptor in
             try await interceptor.modify(request: result)
         }
 
@@ -150,7 +150,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     ) async throws -> (Data, URLResponse) {
         var urlRequest = try buildRequest(from: request)
 
-        urlRequest = try await requestInterceptor.reduce(urlRequest) { result, interceptor in
+        urlRequest = try await requestInterceptors.reduce(urlRequest) { result, interceptor in
             try await interceptor.modify(request: result)
         }
 
@@ -168,7 +168,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     }
 
     func addRequestInterceptor(_ interceptor: any RequestInterceptor) {
-        requestInterceptor.append(interceptor)
+        requestInterceptors.append(interceptor)
     }
 
     func addResponseInterceptor(_ interceptor: any ResponseInterceptor) {
