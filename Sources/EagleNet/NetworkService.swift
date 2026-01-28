@@ -140,7 +140,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
         _ request: any NetworkRequestable,
         progress: ProgressHandler? = nil
     ) async throws -> Response {
-        let result = try await execute(request)
+        let result = try await upload(request, progress: progress)
         return try handleResponse(data: result.0, response: result.1)
     }
     
