@@ -23,7 +23,7 @@ EagleNet is available through [SPM](https://swiftpackageindex.com/AnbalaganD/Eag
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.0.2"))
+    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.0.3"))
 ]
 ```
 
