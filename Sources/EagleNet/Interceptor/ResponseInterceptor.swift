@@ -23,7 +23,7 @@ import FoundationNetworking
 /// ```
 public protocol ResponseInterceptor: Sendable {
     func modify(
-        data: Data,
-        urlResponse: URLResponse
+        data: consuming Data,
+        urlResponse: consuming URLResponse
     ) async throws -> (Data, URLResponse)
 }

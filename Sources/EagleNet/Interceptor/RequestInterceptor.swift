@@ -24,5 +24,5 @@ import FoundationNetworking
 /// }
 /// ```
 public protocol RequestInterceptor: Sendable {
-    func modify(request: URLRequest) async throws -> URLRequest
+    func modify(request: consuming URLRequest) async throws -> URLRequest
 }
