@@ -49,7 +49,7 @@ public protocol NetworkService: Sendable {
     /// - Returns: Decoded response of type `Response`
     /// - Throws: NetworkError if the request fails or response cannot be decoded
     func execute<Response: Decodable>(_ request: any NetworkRequestable) async throws -> Response
-    
+
     /// Executes a network request and returns raw data and response
     /// 
     /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.
@@ -72,7 +72,7 @@ public protocol NetworkService: Sendable {
         _ request: any NetworkRequestable,
         progress: ProgressHandler?
     ) async throws -> Response
-    
+
     /// Uploads data with progress tracking and returns raw data and response
     /// 
     /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.
@@ -121,7 +121,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
         let result = try await execute(request)
         return try handleResponse(data: result.0, response: result.1)
     }
-    
+
     func execute(_ request: any NetworkRequestable) async throws -> (Data, URLResponse) {
         var urlRequest = try buildRequest(from: request)
 
@@ -143,7 +143,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
         let result = try await upload(request, progress: progress)
         return try handleResponse(data: result.0, response: result.1)
     }
-    
+
     func upload(
         _ request: any NetworkRequestable,
         progress: ProgressHandler?

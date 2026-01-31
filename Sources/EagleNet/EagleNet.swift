@@ -95,7 +95,7 @@ public enum EagleNet {
     public static func configure(networkService: any NetworkService) {
         EagleNet.networkService = networkService
     }
-    
+
     /// Creates a default network service with optional custom configuration
     ///
     /// This factory method provides a convenient way to create a NetworkService instance

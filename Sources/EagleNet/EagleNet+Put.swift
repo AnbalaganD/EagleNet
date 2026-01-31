@@ -55,7 +55,7 @@ extension EagleNet {
             )
         )
     }
-    
+
     /// Performs a PUT request returning raw data and response
     /// 
     /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.

@@ -48,7 +48,7 @@ public struct HTTPMethod: RawRepresentable, Sendable {
 
     /// HTTP DELETE method for removing resources
     public static let delete = HTTPMethod(rawValue: "DELETE")
-    
+
     /// Creates a custom HTTP method with the specified method string
     ///
     /// Use this method to create HTTP methods that are not predefined in EagleNet.

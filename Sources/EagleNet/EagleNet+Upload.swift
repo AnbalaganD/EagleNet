@@ -66,14 +66,15 @@ extension EagleNet {
             progress: progress
         )
     }
-    
+
     /// Performs a multipart form-data upload request returning raw data and response
     /// 
     /// This overload returns the raw response Data and URLResponse instead of decoding to a specific type.
     /// Use this when you need access to the raw response data or response metadata.
     /// 
-    /// See ``upload(url:path:headers:queryParameters:parameters:progress:)->Response`` for the decoded response variant.
-    /// 
+    /// See ``upload(url:path:headers:queryParameters:parameters:progress:)->Response``
+    /// for the decoded response variant.
+    ///
     /// - Parameters:
     ///   - url: The base URL for the upload request
     ///   - path: Optional path to append to the URL
@@ -102,7 +103,7 @@ extension EagleNet {
             progress: progress
         )
     }
-    
+
     static private func makeRequest(
         url: any URLConvertible,
         path: String? = nil,
