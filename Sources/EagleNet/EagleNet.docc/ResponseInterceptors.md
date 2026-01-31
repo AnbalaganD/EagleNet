@@ -16,7 +16,7 @@ Implement the `ResponseInterceptor` protocol:
 
 ```swift
 struct LoggingInterceptor: ResponseInterceptor {
-    func modify(data: Data, urlResponse: URLResponse) async throws -> (Data, URLResponse) {
+    func modify(data: consuming Data, urlResponse: consuming URLResponse) async throws -> (Data, URLResponse) {
         if let httpResponse = urlResponse as? HTTPURLResponse {
             print("📥 Response Status: \(httpResponse.statusCode)")
             print("📥 Response Headers: \(httpResponse.allHeaderFields)")
@@ -44,7 +44,7 @@ EagleNet.addResponseInterceptor(LoggingInterceptor())
 
 ```swift
 struct ResponseLoggingInterceptor: ResponseInterceptor {
-    func modify(data: Data, urlResponse: URLResponse) async throws -> (Data, URLResponse) {
+    func modify(data: consuming Data, urlResponse: consuming URLResponse) async throws -> (Data, URLResponse) {
         if let httpResponse = urlResponse as? HTTPURLResponse {
             print("📥 \(httpResponse.statusCode) - \(httpResponse.url?.absoluteString ?? "")")
         }
@@ -57,7 +57,7 @@ struct ResponseLoggingInterceptor: ResponseInterceptor {
 
 ```swift
 struct ErrorHandlingInterceptor: ResponseInterceptor {
-    func modify(data: Data, urlResponse: URLResponse) async throws -> (Data, URLResponse) {
+    func modify(data: consuming Data, urlResponse: consuming URLResponse) async throws -> (Data, URLResponse) {
         if let httpResponse = urlResponse as? HTTPURLResponse,
            httpResponse.statusCode >= 400 {
             // Log error or perform custom error handling
@@ -72,7 +72,7 @@ struct ErrorHandlingInterceptor: ResponseInterceptor {
 
 ```swift
 struct CachingInterceptor: ResponseInterceptor {
-    func modify(data: Data, urlResponse: URLResponse) async throws -> (Data, URLResponse) {
+    func modify(data: consuming Data, urlResponse: consuming URLResponse) async throws -> (Data, URLResponse) {
         // Implement caching logic
         if let httpResponse = urlResponse as? HTTPURLResponse,
            httpResponse.statusCode == 200 {

@@ -111,10 +111,9 @@ let (data, urlResponse) = try await EagleNet.upload(
 struct AuthInterceptor: RequestInterceptor {
     let token: String
     
-    func modify(request: URLRequest) async throws -> URLRequest {
-        var modifiedRequest = request
-        modifiedRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        return modifiedRequest
+    func modify(request: consuming URLRequest) async throws -> URLRequest {
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return request
     }
 }
 
@@ -127,7 +126,7 @@ EagleNet.addRequestInterceptor(
 ### Response Interceptors
 ```swift
 struct LoggingInterceptor: ResponseInterceptor {
-    func modify(data: Data, urlResponse: URLResponse) async throws -> (Data, URLResponse) {
+    func modify(data: consuming Data, urlResponse: consuming URLResponse) async throws -> (Data, URLResponse) {
         if let httpResponse = urlResponse as? HTTPURLResponse {
             print("Response Status Code: \(httpResponse.statusCode)")
             print("Response Headers: \(httpResponse.allHeaderFields)")

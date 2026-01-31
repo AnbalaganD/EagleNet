@@ -18,10 +18,9 @@ Implement the `RequestInterceptor` protocol:
 struct AuthInterceptor: RequestInterceptor {
     let token: String
     
-    func modify(request: URLRequest) async throws -> URLRequest {
-        var modifiedRequest = request
-        modifiedRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        return modifiedRequest
+    func modify(request: consuming URLRequest) async throws -> URLRequest {
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return request
     }
 }
 ```
@@ -44,10 +43,9 @@ EagleNet.addRequestInterceptor(
 struct AuthInterceptor: RequestInterceptor {
     let token: String
     
-    func modify(request: URLRequest) async throws -> URLRequest {
-        var modifiedRequest = request
-        modifiedRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        return modifiedRequest
+    func modify(request: consuming URLRequest) async throws -> URLRequest {
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return request
     }
 }
 ```
@@ -58,10 +56,9 @@ struct AuthInterceptor: RequestInterceptor {
 struct APIKeyInterceptor: RequestInterceptor {
     let apiKey: String
     
-    func modify(request: URLRequest) async throws -> URLRequest {
-        var modifiedRequest = request
-        modifiedRequest.addValue(apiKey, forHTTPHeaderField: "X-API-Key")
-        return modifiedRequest
+    func modify(request: consuming URLRequest) async throws -> URLRequest {
+        request.addValue(apiKey, forHTTPHeaderField: "X-API-Key")
+        return request
     }
 }
 ```
@@ -70,7 +67,7 @@ struct APIKeyInterceptor: RequestInterceptor {
 
 ```swift
 struct RequestLoggingInterceptor: RequestInterceptor {
-    func modify(request: URLRequest) async throws -> URLRequest {
+    func modify(request: consuming URLRequest) async throws -> URLRequest {
         print("🚀 Request: \(request.httpMethod ?? "GET") \(request.url?.absoluteString ?? "")")
         return request
     }
