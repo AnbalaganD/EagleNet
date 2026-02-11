@@ -51,5 +51,5 @@ public protocol NetworkRequestable: Sendable {
     var body: Body? { get }
 
     /// The content type of the request (e.g., application/json)
-    var contentType: ContentType { get }
+    var contentType: ContentType? { get }
 }

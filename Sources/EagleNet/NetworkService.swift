@@ -189,11 +189,9 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
             }
         }
 
-        if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil {
-            urlRequest.setValue(
-                request.contentType.rawValue,
-                forHTTPHeaderField: "Content-Type"
-            )
+        if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil,
+           let contentType = request.contentType?.rawValue {
+            urlRequest.setValue(contentType, forHTTPHeaderField: "Content-Type")
         }
 
         if let bodyValue = request.body {

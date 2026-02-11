@@ -44,7 +44,7 @@ public struct DataRequest: NetworkRequestable, @unchecked Sendable {
     public private(set) var body: Body?
 
     /// Content type of the request (defaults to application/json)
-    public var contentType: ContentType { .applicationJSON }
+    public var contentType: ContentType? { .applicationJSON }
 
     /// Creates a new request with the specified parameters
     /// - Parameters:

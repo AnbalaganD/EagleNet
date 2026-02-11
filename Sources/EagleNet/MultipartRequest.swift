@@ -54,7 +54,7 @@ public struct MultipartRequest: NetworkRequestable {
     }
 
     /// Content type with multipart boundary
-    public var contentType: ContentType {
+    public var contentType: ContentType? {
         .init("\(ContentType.multipartFormData); boundary=\(boundary)")
     }
 

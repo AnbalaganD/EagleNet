@@ -54,8 +54,25 @@ public extension URLConvertible where Self == URL {
     func asURL() throws -> URL { self }
 }
 
+/// Extends URLComponents to convert itself into a URL when used as a URLConvertible
+public extension URLConvertible where Self == URLComponents {
+    /// Converts the URLComponents instance into a URL.
+    /// - Returns: A valid `URL` constructed from the components.
+    /// - Throws: `NetworkError.invalidURL` if the components cannot be represented as a valid URL.
+    func asURL() throws -> URL {
+        guard let url = self.url else {
+            throw NetworkError.invalidURL
+        }
+
+        return url
+    }
+}
+
 /// Extends String to conform to URLConvertible
 extension String: URLConvertible { }
 
 /// Extends URL to conform to URLConvertible
 extension URL: URLConvertible { }
+
+/// Extends URLComponents to conform to URLConvertible
+extension URLComponents: URLConvertible { }
