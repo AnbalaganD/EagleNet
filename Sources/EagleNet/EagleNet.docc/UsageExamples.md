@@ -34,7 +34,8 @@ class UserService {
         let customService = EagleNet.defaultService(
             urlSession: URLSession(configuration: configuration),
             jsonEncoder: JSONEncoder(),
-            jsonDecoder: JSONDecoder()
+            jsonDecoder: JSONDecoder(),
+            fileManager: .default
         )
         
         EagleNet.configure(networkService: customService)
@@ -137,6 +138,85 @@ struct FileUploadView: View {
             DispatchQueue.main.async {
                 self.isUploading = false
                 self.uploadProgress = 0
+            }
+        }
+    }
+}
+```
+
+## File Download with Progress
+
+```swift
+import SwiftUI
+import EagleNet
+
+struct FileDownloadView: View {
+    @State private var downloadProgress: Float = 0
+    @State private var isDownloading = false
+    @State private var downloadedFileURL: URL?
+    
+    // Directory where the file will be saved
+    private var downloadsDirectory: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            if isDownloading {
+                ProgressView(value: downloadProgress)
+                    .progressViewStyle(LinearProgressViewStyle())
+                Text("\(Int(downloadProgress * 100))% downloaded")
+            }
+            
+            if let downloadedFileURL = downloadedFileURL {
+                Text("Saved to:")
+                    .font(.caption)
+                Text(downloadedFileURL.lastPathComponent)
+                    .bold()
+            }
+            
+            Button(isDownloading ? "Downloading..." : "Download Large Video") {
+                downloadVideo()
+            }
+            .disabled(isDownloading)
+            .buttonStyle(.borderedProminent)
+            
+            Text("Note: Background downloading is not currently supported. Keep app active.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+    }
+    
+    private func downloadVideo() {
+        isDownloading = true
+        downloadedFileURL = nil
+        
+        Task {
+            do {
+                let (localURL, _) = try await EagleNet.download(
+                    url: "https://api.example.com/videos/tutorial_hd.mp4",
+                    destinationDirectory: downloadsDirectory,
+                    fileName: "tutorial_hd.mp4",
+                    progress: { bytesDownloaded, totalBytes in
+                        DispatchQueue.main.async {
+                            self.downloadProgress = Float(bytesDownloaded) / Float(totalBytes)
+                        }
+                    }
+                )
+                
+                DispatchQueue.main.async {
+                    self.downloadedFileURL = localURL
+                    print("Download successful! Saved at: \(localURL.path)")
+                }
+            } catch {
+                print("Download failed: \(error)")
+            }
+            
+            DispatchQueue.main.async {
+                self.isDownloading = false
+                self.downloadProgress = 0
             }
         }
     }

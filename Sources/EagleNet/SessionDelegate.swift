@@ -10,10 +10,16 @@ import Foundation
 import FoundationNetworking
 #endif
 
-final class SessionDelegate: NSObject, URLSessionTaskDelegate {
-    private let progress: ProgressHandler?
-    init(progress: ProgressHandler?) {
-        self.progress = progress
+final class SessionDelegate: NSObject, URLSessionTaskDelegate, URLSessionDownloadDelegate {
+    private let uploadProgress: ProgressHandler?
+    private let downloadProgress: ProgressHandler?
+
+    init(
+        uploadProgress: ProgressHandler? = nil,
+        downloadProgress: ProgressHandler? = nil
+    ) {
+        self.uploadProgress = uploadProgress
+        self.downloadProgress = downloadProgress
     }
 
     func urlSession(
@@ -23,6 +29,22 @@ final class SessionDelegate: NSObject, URLSessionTaskDelegate {
         totalBytesSent: Int64,
         totalBytesExpectedToSend: Int64
     ) {
-        progress?(totalBytesSent, totalBytesExpectedToSend)
+        uploadProgress?(totalBytesSent, totalBytesExpectedToSend)
+    }
+    
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) { }
+    
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+        downloadProgress?(totalBytesWritten, totalBytesExpectedToWrite)
     }
 }

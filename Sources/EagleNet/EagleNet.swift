@@ -105,6 +105,7 @@ public enum EagleNet {
     ///   - urlSession: URLSession to use for network requests (defaults to .shared)
     ///   - jsonEncoder: JSON encoder for serializing request bodies (defaults to JSONEncoder())
     ///   - jsonDecoder: JSON decoder for deserializing responses (defaults to JSONDecoder())
+    ///   - fileManager: FileManager to use for file operations like downloads (defaults to .default)
     /// - Returns: Configured NetworkService instance
     ///
     /// ## Usage Examples
@@ -132,12 +133,14 @@ public enum EagleNet {
     public static func defaultService(
         urlSession: URLSession = .shared,
         jsonEncoder: JSONEncoder = .init(),
-        jsonDecoder: JSONDecoder = .init()
+        jsonDecoder: JSONDecoder = .init(),
+        fileManager: FileManager = .default
     ) -> any NetworkService {
         DefaultNetworkService(
             urlSession: urlSession,
             jsonEncoder: jsonEncoder,
-            jsonDecoder: jsonDecoder
+            jsonDecoder: jsonDecoder,
+            fileManager: fileManager
         )
     }
 }
