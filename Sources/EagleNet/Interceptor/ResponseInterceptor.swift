@@ -41,7 +41,7 @@ public protocol ResponseInterceptor: Sendable {
         data: consuming Data,
         urlResponse: consuming URLResponse
     ) async throws -> (Data, URLResponse)
-    
+
     /// Intercepts a response for a download request after the payload has been saved to a local file URL.
     ///
     /// This method is specifically used by download APIs, such as `EagleNet.download(...)`.
@@ -66,7 +66,7 @@ extension ResponseInterceptor {
     ) async throws -> (Data, URLResponse) {
         (data, urlResponse)
     }
-    
+
     func modify(
         url: consuming URL,
         urlResponse: consuming URLResponse

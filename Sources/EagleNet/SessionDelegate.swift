@@ -31,13 +31,13 @@ final class SessionDelegate: NSObject, URLSessionTaskDelegate, URLSessionDownloa
     ) {
         uploadProgress?(totalBytesSent, totalBytesExpectedToSend)
     }
-    
+
     func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
         didFinishDownloadingTo location: URL
     ) { }
-    
+
     func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,

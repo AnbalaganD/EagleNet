@@ -47,7 +47,7 @@ public enum NetworkError: Error {
 
     /// Indicates that the provided value could not be converted to a valid URL
     case invalidURL
-    
+
     /// Indicates that the provided location is not a local `file://` URL.
     case invalidFileURL
 

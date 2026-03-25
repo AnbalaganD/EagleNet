@@ -92,7 +92,7 @@ public protocol NetworkService: Sendable {
         _ request: any NetworkRequestable,
         progress: ProgressHandler?
     ) async throws -> (Data, URLResponse)
-    
+
     /// Downloads a file to a specified local directory
     ///
     /// This method performs an HTTP request and carefully writes the response data
@@ -207,7 +207,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
             try await interceptor.modify(data: result.0, urlResponse: result.1)
         }
     }
-    
+
     func download(
         _ request: any NetworkRequestable,
         destinationDirectory location: any URLConvertible,
@@ -219,16 +219,16 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
         urlRequest = try await requestInterceptors.reduce(urlRequest) { result, interceptor in
             try await interceptor.modify(request: result)
         }
-        
+
         let result = try await urlSession.download(
             for: urlRequest,
             delegate: SessionDelegate(downloadProgress: progress)
         )
-        
+
         let (url, response) = try await responseInterceptors.reduce(result) { result, interceptor in
             try await interceptor.modify(url: result.0, urlResponse: result.1)
         }
-        
+
         if let httpURLResponse = response as? HTTPURLResponse,
               !httpURLResponse.isSuccess {
             throw NetworkError.failure(
@@ -324,7 +324,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
             throw NetworkError.parsingError(error: error, raw: rawString)
         }
     }
-    
+
     private func handleDownloadResponse(
         url: URL,
         response: URLResponse,
@@ -335,23 +335,23 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
         guard storedPath.isFileURL else {
             throw NetworkError.invalidFileURL
         }
-        
+
         guard storedPath.hasDirectoryPath else {
             throw NetworkError.invalidDirectoryPath
         }
-        
+
         if !fileManager.fileExists(atPath: storedPath.path) {
             try fileManager.createDirectory(at: storedPath, withIntermediateDirectories: true)
         }
-        
+
         let name = fileName ?? response.suggestedFilename ?? "download_\(UUID().uuidString)"
         let downloadLocation = storedPath.appendingPathComponent(name)
-        
+
         if fileManager.fileExists(atPath: downloadLocation.path) {
             try fileManager.removeItem(at: downloadLocation)
         }
         try fileManager.moveItem(at: url, to: downloadLocation)
-        
+
         return (downloadLocation, response)
     }
 }

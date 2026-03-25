@@ -60,7 +60,7 @@ extension EagleNet {
         path: String? = nil,
         httpMethod: HTTPMethod = .get,
         headers: [String: String]? = nil,
-        parameters: [String : String]? = nil,
+        parameters: [String: String]? = nil,
         body: Body? = nil,
         destinationDirectory location: any URLConvertible,
         fileName: String? = nil,
