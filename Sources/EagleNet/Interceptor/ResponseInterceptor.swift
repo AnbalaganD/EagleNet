@@ -59,7 +59,7 @@ public protocol ResponseInterceptor: Sendable {
     ) async throws -> (URL, URLResponse)
 }
 
-extension ResponseInterceptor {
+public extension ResponseInterceptor {
     func modify(
         data: consuming Data,
         urlResponse: consuming URLResponse
