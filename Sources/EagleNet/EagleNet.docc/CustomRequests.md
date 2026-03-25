@@ -80,7 +80,7 @@ struct CustomAPIRequest: NetworkRequestable {
     let headers: [String: String]?
     let parameters: [String: String]?
     let body: Body?  // Body is any Encodable or Data
-    let contentType: ContentType
+    var contentType: ContentType? { .applicationJSON }  // ContentType? — optional
     
     init(endpoint: String, apiKey: String) {
         self.url = "https://api.example.com"
@@ -89,7 +89,6 @@ struct CustomAPIRequest: NetworkRequestable {
         self.headers = ["X-API-Key": apiKey]
         self.parameters = nil
         self.body = nil
-        self.contentType = .applicationJSON
     }
 }
 

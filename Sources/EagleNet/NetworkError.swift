@@ -62,7 +62,7 @@ extension NetworkError: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
         return switch self {
         case .failure(message: let message, statusCode: let statusCode, _):
-            "Network request failure.\nMessage: \(message)\nStatus Code:\(statusCode)"
+            "Network request failure.\nMessage: \(message)\nStatus Code: \(statusCode)"
         case .parsingError(error: let error, raw: let raw):
             "Error while parsing the response:\nUnderlying Error: \(error)\nRaw Response: \(raw)"
         case .invalidURL: "Invalid request URL"
