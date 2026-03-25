@@ -344,7 +344,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
             try fileManager.createDirectory(at: storedPath, withIntermediateDirectories: true)
         }
         
-        let name = fileName ?? response.suggestedFilename ?? "unknown_\(UUID().uuidString)"
+        let name = fileName ?? response.suggestedFilename ?? "download_\(UUID().uuidString)"
         let downloadLocation = storedPath.appendingPathComponent(name)
         
         if fileManager.fileExists(atPath: downloadLocation.path) {
