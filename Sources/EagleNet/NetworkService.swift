@@ -114,11 +114,13 @@ public protocol NetworkService: Sendable {
     ///
     /// - Parameters:
     ///   - request: The download request to execute
-    ///   - location: The local directory URL where the file should be saved. Must be a directory URL.
+    ///   - location: The local directory URL where the file should be saved. It must resolve to a local `file://` URL and point to a directory.
     ///   - fileName: Optional custom local file name. If omitted, uses the server's suggested name or a generated UUID.
     ///   - progress: Optional closure to track download progress. Provides bytes downloaded and total expected bytes.
     /// - Returns: Tuple containing the URL of the saved file and the URLResponse
-    /// - Throws: NetworkError if the download fails or the destination is invalid
+    /// - Throws: `NetworkError.invalidFileURL` if `location` does not resolve to a local `file://` URL,
+    ///   `NetworkError.invalidDirectoryPath` if `location` points to a file instead of a directory,
+    ///   or another `NetworkError` if the download request or file operation fails.
     func download(
         _ request: any NetworkRequestable,
         destinationDirectory location: any URLConvertible,
@@ -331,15 +333,11 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     ) throws -> (URL, URLResponse) {
         let storedPath = try location.asURL()
         guard storedPath.isFileURL else {
-            throw NetworkError.invalidFileURL(
-                message: "`destinationDirectory` should be local file URL"
-            )
+            throw NetworkError.invalidFileURL
         }
         
         guard storedPath.hasDirectoryPath else {
-            throw NetworkError.invalidFileURL(
-                message: "`destinationDirectory` should be point to `directory` not a file"
-            )
+            throw NetworkError.invalidDirectoryPath
         }
         
         if !fileManager.fileExists(atPath: storedPath.path) {

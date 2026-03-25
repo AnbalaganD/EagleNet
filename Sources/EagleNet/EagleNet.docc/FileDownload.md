@@ -65,6 +65,13 @@ let (localURL, response) = try await EagleNet.download(
 )
 ```
 
+## Destination Validation
+
+The `destinationDirectory` argument must resolve to a local `file://` URL and point to a directory.
+
+- `NetworkError.invalidFileURL` is thrown when the value does not resolve to a local file URL.
+- `NetworkError.invalidDirectoryPath` is thrown when the value points to a file instead of a directory.
+
 ## Important Limitations
 
 When utilizing EagleNet's `download` APIs, please be aware of the following current limitations:

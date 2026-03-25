@@ -118,6 +118,11 @@ let (localURL, response) = try await EagleNet.download(
 )
 ```
 
+`destinationDirectory` must resolve to a local `file://` URL and point to a directory.
+
+- `NetworkError.invalidFileURL` is thrown when the value is not a local file URL.
+- `NetworkError.invalidDirectoryPath` is thrown when the value points to a file instead of a directory.
+
 > **Note:** Background downloads and pause/resume tracking are currently **not supported**. Downloads will be cancelled if the application goes into the background or is terminated.
 
 ### Request Interceptors

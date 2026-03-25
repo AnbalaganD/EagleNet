@@ -210,6 +210,15 @@ struct FileDownloadView: View {
                     self.downloadedFileURL = localURL
                     print("Download successful! Saved at: \(localURL.path)")
                 }
+            } catch let error as NetworkError {
+                switch error {
+                case .invalidFileURL:
+                    print("Download failed: destination must be a local file URL")
+                case .invalidDirectoryPath:
+                    print("Download failed: destination must be a directory")
+                default:
+                    print("Download failed: \(error)")
+                }
             } catch {
                 print("Download failed: \(error)")
             }

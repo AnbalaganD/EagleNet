@@ -11,7 +11,7 @@ import FoundationNetworking
 #endif
 
 /// This protocol is used to intercept the response before it is returned to the caller.
-/// It is useful for modifying the response `Data`, `URL` (for file downloads), or `URLResponse`.
+/// It is useful for modifying the response `Data`, `URL` for download requests, or `URLResponse`.
 ///
 /// ```swift
 /// struct MyResponseInterceptor: ResponseInterceptor {
@@ -21,7 +21,7 @@ import FoundationNetworking
 ///    }
 ///
 ///    func modify(url: URL, urlResponse: URLResponse) async throws -> (URL, URLResponse) {
-///        // Modify the file URL or URLResponse here
+///        // Modify the downloaded file URL or URLResponse here
 ///        return (url, urlResponse)
 ///    }
 /// }
@@ -42,13 +42,14 @@ public protocol ResponseInterceptor: Sendable {
         urlResponse: consuming URLResponse
     ) async throws -> (Data, URLResponse)
     
-    /// Intercepts a response where the data has been saved directly to a file URL (e.g., Download).
+    /// Intercepts a response for a download request after the payload has been saved to a local file URL.
     ///
-    /// This method allows you to modify the resulting local `URL` or `URLResponse`
-    /// of a file download request before it is returned to the caller.
+    /// This method is specifically used by download APIs, such as `EagleNet.download(...)`.
+    /// It allows you to modify the resulting local file `URL` or `URLResponse`
+    /// before the download result is returned to the caller.
     ///
     /// - Parameters:
-    ///   - url: The local file URL where the downloaded content is temporarily saved.
+    ///   - url: The local file URL where the downloaded content is saved.
     ///   - urlResponse: The HTTP response metadata from the server.
     /// - Returns: A tuple potentially containing a modified `URL` and `URLResponse`.
     /// - Throws: Any error that should interrupt the flow.

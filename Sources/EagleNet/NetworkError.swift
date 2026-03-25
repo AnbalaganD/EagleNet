@@ -48,13 +48,11 @@ public enum NetworkError: Error {
     /// Indicates that the provided value could not be converted to a valid URL
     case invalidURL
     
-    /// Indicates that the provided location is an invalid local file URL.
-    ///
-    /// This error is typically thrown during file operations, such as downloads, when the
-    /// destination URL is not a valid `file://` URL or when a directory path is expected
-    /// but a file path is provided (or vice versa).
-    /// - Parameter message: A descriptive message explaining why the file URL is invalid.
-    case invalidFileURL(message: String)
+    /// Indicates that the provided location is not a local `file://` URL.
+    case invalidFileURL
+
+    /// Indicates that a directory path was expected, but the provided path points to a file.
+    case invalidDirectoryPath
 }
 
 extension NetworkError: CustomStringConvertible, CustomDebugStringConvertible {
@@ -66,8 +64,10 @@ extension NetworkError: CustomStringConvertible, CustomDebugStringConvertible {
         case .parsingError(error: let error, raw: let raw):
             "Error while parsing the response:\nUnderlying Error: \(error)\nRaw Response: \(raw)"
         case .invalidURL: "Invalid request URL"
-        case .invalidFileURL(message: let message):
-            "Local File Error: \(message)"
+        case .invalidFileURL:
+            "Local File Error: Expected a local file URL"
+        case .invalidDirectoryPath:
+            "Local File Error: Expected a directory path, not a file"
         }
     }
 

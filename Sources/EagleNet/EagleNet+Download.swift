@@ -48,11 +48,13 @@ extension EagleNet {
     ///   - headers: Optional HTTP headers.
     ///   - parameters: Optional query parameters.
     ///   - body: Optional request body (any Encodable type or Data).
-    ///   - location: The local directory URL where the file should be saved. Must be a file URL and point to a directory.
+    ///   - location: The local directory URL where the file should be saved. It must resolve to a local `file://` URL and point to a directory.
     ///   - fileName: Optional custom file name for the downloaded file. If `nil`, a suggested filename from the response or a generated UUID will be used.
     ///   - progress: Optional closure to track download progress. Provides bytes downloaded and total expected bytes.
     /// - Returns: A tuple containing the local `URL` where the file was saved and the `URLResponse`.
-    /// - Throws: `NetworkError` if the request fails, the destination is invalid, or a file operation fails.
+    /// - Throws: `NetworkError.invalidFileURL` if `location` does not resolve to a local `file://` URL,
+    ///   `NetworkError.invalidDirectoryPath` if `location` points to a file instead of a directory,
+    ///   or another `NetworkError` if the request or file operation fails.
     public static func download(
         url: any URLConvertible,
         path: String? = nil,
