@@ -23,7 +23,8 @@ configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
 let customService = EagleNet.defaultService(
     urlSession: URLSession(configuration: configuration),
     jsonEncoder: JSONEncoder(),
-    jsonDecoder: JSONDecoder()
+    jsonDecoder: JSONDecoder(),
+    fileManager: .default
 )
 
 EagleNet.configure(networkService: customService)
@@ -53,7 +54,8 @@ decoder.dateDecodingStrategy = .iso8601
 let service = EagleNet.defaultService(
     urlSession: .shared,
     jsonEncoder: encoder,
-    jsonDecoder: decoder
+    jsonDecoder: decoder,
+    fileManager: .default
 )
 
 EagleNet.configure(networkService: service)

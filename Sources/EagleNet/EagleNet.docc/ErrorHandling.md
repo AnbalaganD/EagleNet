@@ -75,6 +75,10 @@ func handleNetworkError(_ error: Error) {
         switch networkError {
         case .invalidURL:
             showAlert("Invalid URL")
+        case .invalidFileURL:
+            showAlert("Invalid file URL")
+        case .invalidDirectoryPath:
+            showAlert("Invalid destination directory")
         case .failure(let message, let statusCode, _):
             showAlert("HTTP Error \(statusCode): \(message)")
         case .parsingError(let error, let raw):

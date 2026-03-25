@@ -16,6 +16,7 @@ import FoundationNetworking
 /// - Async/await based networking
 /// - Request/Response interceptors
 /// - File uploads with progress tracking
+/// - File downloading direct-to-disk
 /// - JSON encoding/decoding
 ///
 /// Example usage:
@@ -23,7 +24,8 @@ import FoundationNetworking
 /// let service = EagleNet.defaultService(
 ///     urlSession: .shared,
 ///     jsonEncoder: JSONEncoder(),
-///     jsonDecoder: JSONDecoder()
+///     jsonDecoder: JSONDecoder(),
+///     fileManager: .default
 /// )
 ///
 /// // Add interceptors if needed
@@ -41,7 +43,8 @@ public protocol NetworkService: Sendable {
     init(
         urlSession: URLSession,
         jsonEncoder: JSONEncoder,
-        jsonDecoder: JSONDecoder
+        jsonDecoder: JSONDecoder,
+        fileManager: FileManager
     )
 
     /// Executes a network request and returns the decoded response
@@ -89,6 +92,41 @@ public protocol NetworkService: Sendable {
         _ request: any NetworkRequestable,
         progress: ProgressHandler?
     ) async throws -> (Data, URLResponse)
+    
+    /// Downloads a file to a specified local directory
+    ///
+    /// This method performs an HTTP request and carefully writes the response data
+    /// directly to the specified destination directory to avoid excessive memory usage.
+    ///
+    /// > Note: Background downloads are currently **not supported** by this library.
+    ///
+    /// ## Usage Example
+    /// ```swift
+    /// let (localURL, response) = try await service.download(
+    ///     request,
+    ///     destinationDirectory: downloadsFolder,
+    ///     progress: { bytesDownloaded, totalBytes in
+    ///         let percentage = (Double(bytesDownloaded) / Double(totalBytes)) * 100
+    ///         print(String(format: "Downloading: %.1f%%", percentage))
+    ///     }
+    /// )
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - request: The download request to execute
+    ///   - location: The local directory URL where the file should be saved. It must resolve to a local `file://` URL and point to a directory.
+    ///   - fileName: Optional custom local file name. If omitted, uses the server's suggested name or a generated UUID.
+    ///   - progress: Optional closure to track download progress. Provides bytes downloaded and total expected bytes.
+    /// - Returns: Tuple containing the URL of the saved file and the URLResponse
+    /// - Throws: `NetworkError.invalidFileURL` if `location` does not resolve to a local `file://` URL,
+    ///   `NetworkError.invalidDirectoryPath` if `location` points to a file instead of a directory,
+    ///   or another `NetworkError` if the download request or file operation fails.
+    func download(
+        _ request: any NetworkRequestable,
+        destinationDirectory location: any URLConvertible,
+        fileName: String?,
+        progress: ProgressHandler?
+    ) async throws -> (URL, URLResponse)
 
     /// Adds an interceptor to modify requests before they are sent
     /// - Parameter interceptor: The request interceptor to add
@@ -103,6 +141,7 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     private let urlSession: URLSession
     private let jsonEncoder: JSONEncoder
     private let jsonDecoder: JSONDecoder
+    private let fileManager: FileManager
 
     private var requestInterceptors = [any RequestInterceptor]()
     private var responseInterceptors = [any ResponseInterceptor]()
@@ -110,11 +149,13 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
     required init(
         urlSession: URLSession = .shared,
         jsonEncoder: JSONEncoder = .init(),
-        jsonDecoder: JSONDecoder = .init()
+        jsonDecoder: JSONDecoder = .init(),
+        fileManager: FileManager = .default
     ) {
         self.urlSession = urlSession
         self.jsonEncoder = jsonEncoder
         self.jsonDecoder = jsonDecoder
+        self.fileManager = fileManager
     }
 
     func execute<Response: Decodable>(_ request: any NetworkRequestable) async throws -> Response {
@@ -159,12 +200,50 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
         let result = try await urlSession.upload(
             for: urlRequest,
             from: bodyData,
-            delegate: SessionDelegate(progress: progress)
+            delegate: SessionDelegate(uploadProgress: progress)
         )
 
         return try await responseInterceptors.reduce(result) { result, interceptor in
             try await interceptor.modify(data: result.0, urlResponse: result.1)
         }
+    }
+    
+    func download(
+        _ request: any NetworkRequestable,
+        destinationDirectory location: any URLConvertible,
+        fileName: String? = nil,
+        progress: ProgressHandler? = nil
+    ) async throws -> (URL, URLResponse) {
+        var urlRequest = try buildRequest(from: request)
+
+        urlRequest = try await requestInterceptors.reduce(urlRequest) { result, interceptor in
+            try await interceptor.modify(request: result)
+        }
+        
+        let result = try await urlSession.download(
+            for: urlRequest,
+            delegate: SessionDelegate(downloadProgress: progress)
+        )
+        
+        let (url, response) = try await responseInterceptors.reduce(result) { result, interceptor in
+            try await interceptor.modify(url: result.0, urlResponse: result.1)
+        }
+        
+        if let httpURLResponse = response as? HTTPURLResponse,
+              !httpURLResponse.isSuccess {
+            throw NetworkError.failure(
+                message: httpURLResponse.description,
+                statusCode: httpURLResponse.statusCode,
+                data: nil
+            )
+        }
+
+        return try handleDownloadResponse(
+            url: url,
+            response: response,
+            destinationDirectory: location,
+            fileName: fileName
+        )
     }
 
     func addRequestInterceptor(_ interceptor: any RequestInterceptor) {
@@ -244,5 +323,35 @@ final class DefaultNetworkService: NetworkService, @unchecked Sendable {
             let rawString = String(data: data, encoding: .utf8) ?? ""
             throw NetworkError.parsingError(error: error, raw: rawString)
         }
+    }
+    
+    private func handleDownloadResponse(
+        url: URL,
+        response: URLResponse,
+        destinationDirectory location: any URLConvertible,
+        fileName: String? = nil
+    ) throws -> (URL, URLResponse) {
+        let storedPath = try location.asURL()
+        guard storedPath.isFileURL else {
+            throw NetworkError.invalidFileURL
+        }
+        
+        guard storedPath.hasDirectoryPath else {
+            throw NetworkError.invalidDirectoryPath
+        }
+        
+        if !fileManager.fileExists(atPath: storedPath.path) {
+            try fileManager.createDirectory(at: storedPath, withIntermediateDirectories: true)
+        }
+        
+        let name = fileName ?? response.suggestedFilename ?? "download_\(UUID().uuidString)"
+        let downloadLocation = storedPath.appendingPathComponent(name)
+        
+        if fileManager.fileExists(atPath: downloadLocation.path) {
+            try fileManager.removeItem(at: downloadLocation)
+        }
+        try fileManager.moveItem(at: url, to: downloadLocation)
+        
+        return (downloadLocation, response)
     }
 }

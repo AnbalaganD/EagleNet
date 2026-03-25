@@ -72,7 +72,8 @@ configuration.timeoutIntervalForRequest = 30
 let customService = EagleNet.defaultService(
     urlSession: URLSession(configuration: configuration),
     jsonEncoder: JSONEncoder(),
-    jsonDecoder: JSONDecoder()
+    jsonDecoder: JSONDecoder(),
+    fileManager: .default
 )
 
 EagleNet.configure(networkService: customService)
