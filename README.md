@@ -10,6 +10,8 @@ This library aims to provide a simple and elegant approach to writing network re
 
 Currently, this library supports basic HTTP data requests (`GET`, `POST`, `PUT`, `DELETE`), custom HTTP methods, file uploading using `multipart/form-data`, and direct-to-disk file downloading. These capabilities address the majority of network communication needs in most applications.<br><br>
 
+EagleNet supports both a **shared static style** and **multiple instance style**. Use the static convenience APIs for simple app-wide networking, or create separate `EagleNet` instances when different features need different URL sessions, interceptors, or mock services.<br><br>
+
 For detailed information on feature status, please refer to the [Roadmap](https://github.com/AnbalaganD/EagleNet/wiki/Roadmap) file.
 <br><br>
 See the complete documentation here: [Documentation](https://swiftpackageindex.com/AnbalaganD/EagleNet/main/documentation/eaglenet)
@@ -46,6 +48,55 @@ let (data, response) = try await EagleNet.get(
     url: "https://api.example.com/users/1"
 )
 ```
+
+### Shared and Instance Clients
+
+```swift
+import EagleNet
+
+struct User: Decodable {
+    let id: Int
+    let name: String
+}
+
+// Shared static style
+let currentUser: User = try await EagleNet.get(
+    url: "https://api.example.com/users/me"
+)
+
+// Separate instance for auth requests
+let authClient = EagleNet(
+    networkService: EagleNet.defaultService(
+        urlSession: .shared,
+        jsonEncoder: JSONEncoder(),
+        jsonDecoder: JSONDecoder(),
+        fileManager: .default
+    )
+)
+
+let authUser: User = try await authClient.get(
+    url: "https://auth.example.com",
+    path: "/users/me"
+)
+
+// Separate instance for file related requests
+let filesClient = EagleNet(
+    networkService: EagleNet.defaultService(
+        urlSession: URLSession(configuration: .ephemeral),
+        jsonEncoder: JSONEncoder(),
+        jsonDecoder: JSONDecoder(),
+        fileManager: .default
+    )
+)
+
+let downloadURL = try await filesClient.download(
+    url: "https://cdn.example.com",
+    path: "/reports/latest.pdf",
+    destinationDirectory: URL(fileURLWithPath: "/tmp/downloads")
+)
+```
+
+Use separate instances when each module needs its own base URL, timeout, headers, or test double.
 
 ### Making a POST Request
 
