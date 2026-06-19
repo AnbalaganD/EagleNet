@@ -103,7 +103,7 @@ public struct MultipartRequest: NetworkRequestable {
     /// Adds multiple headers to the request
     /// - Parameter contents: Dictionary of headers to add
     mutating func addHeader(
-        contentOf contents: [String: String]
+        contentsOf contents: [String: String]
     ) {
         if headers == nil {
             headers = contents
@@ -129,7 +129,7 @@ public struct MultipartRequest: NetworkRequestable {
     /// Adds multiple query parameters to the request
     /// - Parameter contents: Dictionary of parameters to add
     mutating func addParameter(
-        contentOf contents: [String: String]
+        contentsOf contents: [String: String]
     ) {
         if parameters == nil {
             parameters = contents
@@ -180,7 +180,7 @@ public struct MultipartRequest: NetworkRequestable {
     /// Adds multiple text fields to the multipart form
     /// - Parameter parameters: Dictionary of field names and values
     public mutating func addBodyParameters(
-        contentOf parameters: [String: String]
+        contentsOf parameters: [String: String]
     ) {
         for (key, value) in parameters {
             addBody(

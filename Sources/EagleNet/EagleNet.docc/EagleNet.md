@@ -18,7 +18,7 @@ EagleNet provides a simple and elegant approach to writing network requests. It'
 - **📚 Well documented**: Comprehensive documentation to guide usage
 - **⚙️ Customizable and testable**: Flexible and ensures code quality through testing
 
-Currently supports basic HTTP data requests (`GET`, `POST`, `PUT`, `DELETE`) and includes file upload using `multipart/form-data`.
+Currently supports basic HTTP data requests (`GET`, `POST`, `PUT`, `DELETE`), uploading files using `multipart/form-data`, and direct-to-disk file downloading.
 
 ## Topics
 
@@ -32,6 +32,7 @@ Currently supports basic HTTP data requests (`GET`, `POST`, `PUT`, `DELETE`) and
 - <doc:BasicRequests>
 - <doc:CustomRequests>
 - <doc:FileUpload>
+- <doc:FileDownload>
 
 ### Advanced Features
 
@@ -52,7 +53,7 @@ Add EagleNet to your project using Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.0.4"))
+    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.1.1"))
 ]
 ```
 

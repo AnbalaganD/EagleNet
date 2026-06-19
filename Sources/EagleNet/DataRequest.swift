@@ -85,7 +85,7 @@ public struct DataRequest: NetworkRequestable, @unchecked Sendable {
     /// Adds multiple headers to the request
     /// - Parameter contents: Dictionary of headers to add
     mutating func addHeader(
-        contentOf contents: [String: String]
+        contentsOf contents: [String: String]
     ) {
         if headers == nil {
             headers = contents
@@ -111,7 +111,7 @@ public struct DataRequest: NetworkRequestable, @unchecked Sendable {
     /// Adds multiple query parameters to the request
     /// - Parameter contents: Dictionary of parameters to add
     mutating func addParameter(
-        contentOf contents: [String: String]
+        contentsOf contents: [String: String]
     ) {
         if parameters == nil {
             parameters = contents

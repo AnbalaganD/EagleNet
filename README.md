@@ -8,9 +8,9 @@ This library aims to provide a simple and elegant approach to writing network re
 - **Well documented:** Provide comprehensive documentation to guide usage.
 - **Customizable and testable:** Allow for flexibility and ensure code quality through testing.
 
+Currently, this library supports basic HTTP data requests (`GET`, `POST`, `PUT`, `DELETE`), custom HTTP methods, file uploading using `multipart/form-data`, and direct-to-disk file downloading. These capabilities address the majority of network communication needs in most applications.<br><br>
 
-Currently, this library supports basic HTTP data requests (`GET`, `POST`, `PUT`, `DELETE`), custom HTTP methods, and includes a small file upload feature using `multipart/form-data`. These capabilities address the majority of network communication needs in most applications.<br><br>
-
+EagleNet supports both a **shared static style** and **multiple instance style**. Use the static convenience APIs for simple app-wide networking, or create separate `EagleNet` instances when different features need different URL sessions, interceptors, or mock services.<br><br>
 
 For detailed information on feature status, please refer to the [Roadmap](https://github.com/AnbalaganD/EagleNet/wiki/Roadmap) file.
 <br><br>
@@ -23,7 +23,7 @@ EagleNet is available through [SPM](https://swiftpackageindex.com/AnbalaganD/Eag
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.0.4"))
+    .package(url: "https://github.com/AnbalaganD/EagleNet", .upToNextMajor(from: "2.1.1"))
 ]
 ```
 
@@ -48,6 +48,55 @@ let (data, response) = try await EagleNet.get(
     url: "https://api.example.com/users/1"
 )
 ```
+
+### Shared and Instance Clients
+
+```swift
+import EagleNet
+
+struct User: Decodable {
+    let id: Int
+    let name: String
+}
+
+// Shared static style
+let currentUser: User = try await EagleNet.get(
+    url: "https://api.example.com/users/me"
+)
+
+// Separate instance for auth requests
+let authClient = EagleNet(
+    networkService: EagleNet.defaultService(
+        urlSession: .shared,
+        jsonEncoder: JSONEncoder(),
+        jsonDecoder: JSONDecoder(),
+        fileManager: .default
+    )
+)
+
+let authUser: User = try await authClient.get(
+    url: "https://auth.example.com",
+    path: "/users/me"
+)
+
+// Separate instance for file related requests
+let filesClient = EagleNet(
+    networkService: EagleNet.defaultService(
+        urlSession: URLSession(configuration: .ephemeral),
+        jsonEncoder: JSONEncoder(),
+        jsonDecoder: JSONDecoder(),
+        fileManager: .default
+    )
+)
+
+let downloadURL = try await filesClient.download(
+    url: "https://cdn.example.com",
+    path: "/reports/latest.pdf",
+    destinationDirectory: URL(fileURLWithPath: "/tmp/downloads")
+)
+```
+
+Use separate instances when each module needs its own base URL, timeout, headers, or test double.
 
 ### Making a POST Request
 
@@ -104,6 +153,28 @@ let (data, urlResponse) = try await EagleNet.upload(
     ]
 )
 ```
+
+### File Download
+
+```swift
+let destinationDirectory = URL(fileURLWithPath: "/path/to/downloads")
+
+let (localURL, response) = try await EagleNet.download(
+    url: "https://example.com/large-video.mp4",
+    destinationDirectory: destinationDirectory,
+    progress: { bytesDownloaded, totalBytes in
+        let progress = Float(bytesDownloaded) / Float(totalBytes)
+        print("Download progress: \(Int(progress * 100))%")
+    }
+)
+```
+
+`destinationDirectory` must resolve to a local `file://` URL and point to a directory.
+
+- `NetworkError.invalidFileURL` is thrown when the value is not a local file URL.
+- `NetworkError.invalidDirectoryPath` is thrown when the value points to a file instead of a directory.
+
+> **Note:** Background downloads and pause/resume tracking are currently **not supported**. Downloads will be cancelled if the application goes into the background or is terminated.
 
 ### Request Interceptors
 
@@ -167,7 +238,8 @@ let response: User = try await EagleNet.execute(patchRequest)
 let customService = EagleNet.defaultService(
     urlSession: URLSession(configuration: .ephemeral),
     jsonEncoder: JSONEncoder(),
-    jsonDecoder: JSONDecoder()
+    jsonDecoder: JSONDecoder(),
+    fileManager: .default
 )
 
 EagleNet.configure(networkService: customService)

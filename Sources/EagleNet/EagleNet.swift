@@ -53,10 +53,38 @@ import FoundationNetworking
 ///     }
 /// )
 /// ```
-public enum EagleNet {
+public final class EagleNet: Sendable {
+    /// The shared EagleNet instance used by the static convenience APIs.
+    static let shared = EagleNet()
+    
     /// The underlying network service that handles all requests
     @EagleNetActor
-    static var networkService: any NetworkService = DefaultNetworkService()
+    var networkService: any NetworkService
+    
+    init() {
+        self.networkService = DefaultNetworkService()
+    }
+
+    /// Creates an EagleNet instance with a custom network service.
+    ///
+    /// Use this initializer when you want to isolate networking behavior for a specific
+    /// component, test case, or feature module without changing the shared global instance.
+    ///
+    /// - Parameter networkService: The network service implementation to use.
+    public init(networkService: any NetworkService) {
+        self.networkService = networkService
+    }
+    
+    /// Replaces the current network service for this EagleNet instance.
+    ///
+    /// This is useful when you want to swap configurations at runtime for a single
+    /// client instance without affecting `EagleNet.shared`.
+    ///
+    /// - Parameter networkService: The new network service implementation to use.
+    @EagleNetActor
+    public func configure(networkService: any NetworkService) {
+        self.networkService = networkService
+    }
 
     /// Configures EagleNet with a custom network service implementation.
     ///
@@ -93,7 +121,7 @@ public enum EagleNet {
     ///   the custom configuration is applied consistently.
     @EagleNetActor
     public static func configure(networkService: any NetworkService) {
-        EagleNet.networkService = networkService
+        shared.configure(networkService: networkService)
     }
 
     /// Creates a default network service with optional custom configuration
@@ -105,6 +133,7 @@ public enum EagleNet {
     ///   - urlSession: URLSession to use for network requests (defaults to .shared)
     ///   - jsonEncoder: JSON encoder for serializing request bodies (defaults to JSONEncoder())
     ///   - jsonDecoder: JSON decoder for deserializing responses (defaults to JSONDecoder())
+    ///   - fileManager: FileManager to use for file operations like downloads (defaults to .default)
     /// - Returns: Configured NetworkService instance
     ///
     /// ## Usage Examples
@@ -132,12 +161,14 @@ public enum EagleNet {
     public static func defaultService(
         urlSession: URLSession = .shared,
         jsonEncoder: JSONEncoder = .init(),
-        jsonDecoder: JSONDecoder = .init()
+        jsonDecoder: JSONDecoder = .init(),
+        fileManager: FileManager = .default
     ) -> any NetworkService {
         DefaultNetworkService(
             urlSession: urlSession,
             jsonEncoder: jsonEncoder,
-            jsonDecoder: jsonDecoder
+            jsonDecoder: jsonDecoder,
+            fileManager: fileManager
         )
     }
 }
